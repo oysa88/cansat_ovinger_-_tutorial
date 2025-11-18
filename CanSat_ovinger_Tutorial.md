@@ -1,15 +1,20 @@
 # CanSat Øvinger Tutorial
 
+### @diffs true
+
 ## Del 1: @unplugged
 
 ### CanSat Øvingsoppgaver @unplugged
 
 I denne veiledningen skal vi gå gjennom grunnleggende funksjoner som dere får bruk for når dere skal programmere en CanSat. 
 
-Oppgaver dere skal løse er:
-- Få et LED-lys til å blinke ved koble det til pins på micro:betingelse
-- Lage en nedtelling ved hjelp av for-løkker 
-- Lese analogverdi fra en TMP36 (Temperatursensor) og konvertere disse til temperaturverdier
+**Oppgaver dere skal løse er: **
+
+- **1)** Få et LED-lys til å blinke ved koble det til pins på micro:betingelse
+- **2)** Lage en teller som teller fra 10 til 0, og som skrur på LED-lyset i 5 sekunder.
+- **3)** Bruke en OLED-skjerm, og vise nedtellingen på skjermen.
+- **4)** Lege et voltmeter som skriver spenningen til OLED-skjermen.
+- **5)** Lese analogverdi fra en TMP36 (Temperatursensor) og konvertere disse til temperaturverdier vi viser på OLED-skjermen.
 
 Lykke til!
 
@@ -22,107 +27,108 @@ Lykke til!
 
 Koble opp kretsen som vist på bildet under.
 
+NB: Koble pluss på LED til ingangen P0 og minus til jord (GND).
+
 ![microbit-ovelse-1-LED.jpg](https://i.postimg.cc/wBXCyNSs/microbit-ovelse-1-LED.jpg)
 
 
 ## Del 1.2:
 
-### Sjekke ArmStatus på kofferten
+### Oppgave 1: Få LED-lyset til å skru seg AV og PÅ én gang hvert sekund.
 
 Inni ``||basic: Gjenta for alltid||``:
 
-Sett opp en ``||logic: hvis-betingelse ||`` som sjekker om Software Arm Switch (``||pins: les digitalverdi P1 ||``) er 0. 
+Vi skal  bruke blokken ``||pins: skriv digital til||`` for å skru på LED-lyset vi har koblet til CanSat. Sett verdien til 1 for å skru lyset PÅ og 0 for å skru det AV.
 
-Hvis ``||pins: P1 = 0 ||``, sett variabelen ``||variabel: ArmStatus ||`` til ``||logic: sann||``, ellers sett ``||variabel: ArmStatus ||`` til ``||logic: usann||``.
+Bruk en ``||basic: pause||`` for å si hvor lenge lyset skal være PÅ og AV.
+
+**Ekstra**: Endre hvor fort LED-lyset blinker ved å justere på tiden i ``||basic: pause||``-blokken.
+
+**HINT**: 1000 ms i ett sekund
+
 
 ```blocks
-basic.forever(function on_forever() {
-    if (pins.digitalReadPin(DigitalPin.P1) == 0) {
-        ArmStatus = true
-    } else {
-        ArmStatus = false
-    } 
+basic.forever(function () {
+    pins.digitalWritePin(DigitalPin.P0, 1)
+    basic.pause(500)
+    pins.digitalWritePin(DigitalPin.P0, 0)
+    basic.pause(500)
 })
 ```
 
-## Del 1.3:
+## Del 2.1:
 
-### Sjekke om Launch-knappen er trykket ned
+### Oppgave 2: Telle fra 10 til 0
 
-Lag en ny ``||logic: hvis-betingelse ||`` som sjekker om Launch-button (``||pins: les digitalverdi P11 ||``) er 0. 
+For å kunne telle nedover, trenger vi en variabel som kan huske tallet vår. Lag en ny variabel: ``||variables: teller ||``.
 
-Hvis den er det, kjør funksjonen ``||functions: Launch||``.
+Siden vi skal telle ned fra 10 til 0, bruker vi en ``||loops: FOR-løkke ||`` som lar og gjenta løkken akkurat så mange ganger vi ønsker. 
+
+Sett ``||loops: gjenta for indeks ||`` til å kjøres **fra 0 til 10**.
+
+Inni ``||loops: FOR-løkke ||`` skal vi bruke en ``||basic: vis tall ||`` til å vise ``||variables: teller ||``. Og for hver gang den har vist tallet, ``||variables: endre teller med -1 ||``.
 
 ```blocks
-basic.forever(function on_forever() {
-    if (pins.digitalReadPin(DigitalPin.P1) == 0) {
-        ArmStatus = true
-    } else {
-        ArmStatus = false
-    } 
-    if (pins.digitalReadPin(DigitalPin.P11) == 0) {
-        Launch()
+let teller = 0
+basic.forever(function () {
+    teller = 10
+    for (let indeks = 0; indeks <= 10; indeks++) {
+        basic.showNumber(teller)
+        teller += -1
     }
 })
-function Launch () {
-	
-}
 ```
 
-## Del 1.4:
+## Del 2.2:
 
-### Launch-kommando kun ved armering
+### Oppgave 2: Få LED-lys til å lyse i 5 sek.
 
-Launch-kommandoen skal kun få bli sendt hvis ``||variabel: ArmStatus ||`` er ``||logic: Sann ||``.
-
-Kommandoen skal sendes med radio til LaunchPAD. Send ``||radio: radio send tall 42 ||``.
+Bruk de samme blokkene fra oppgave 1 for å skru på LED i 5 sekunder. Endre ``||basic: pause ||`` til 5000 ms.
 
 ```blocks
-function Launch () {
-	if (ArmStatus) {
-        radio.sendNumber(42)
+let teller = 0
+basic.forever(function () {
+    teller = 10
+    for (let indeks = 0; indeks <= 10; indeks++) {
+        basic.showNumber(teller)
+        teller += -1
     }
-}
+    pins.digitalWritePin(DigitalPin.P0, 1)
+    basic.pause(5000)
+    pins.digitalWritePin(DigitalPin.P0, 0)
+})
 ```
 
-## Del 1.5:
+## Del 2.3:
 
-### Buzzer som varsler om oppskytning
+### Stopp nedtellingen
 
-For å si ifra til omgivelsene at systemet er armert, skal vi skru PÅ Buzzer (``||pins: skriv digital til P13 = 1 ||``) når ``||variabel: ArmStatus ||`` er ``||logic: sann ||``, og AV når ``||variabel: ArmStatus ||`` er ``||logic: usann ||``. 
+Vi kan ikke stoppe blokken ``||basic: gjenta for alltid ||``. Men det vi kan, er å bruke en ``||loops: gjenta hvis sann ||`` der betingelsen alltid er oppfylt. Da vil koden forbli i løkken og gjenta den for alltid.
 
-Skru AV Buzzer (``||pins: skriv digital til P13 = 0 ||``) etter du har sendt Launch-kommando.
+La ``||loops: gjenta hvis sann ||`` stå tom, for det er ingenting den skal utføre.
 
 ```blocks
-basic.forever(function on_forever() {
-    if (pins.digitalReadPin(DigitalPin.P1) == 0) {
-        ArmStatus = true
-        pins.digitalWritePin(DigitalPin.P13, 1)
-    } else {
-        ArmStatus = false
-        pins.digitalWritePin(DigitalPin.P13, 0)
-    } 
-    if (pins.digitalReadPin(DigitalPin.P11) == 0) {
-        Launch()
+let teller = 0
+basic.forever(function () {
+    teller = 10
+    for (let indeks = 0; indeks <= 10; indeks++) {
+        basic.showNumber(teller)
+        teller += -1
+    }
+    pins.digitalWritePin(DigitalPin.P0, 1)
+    basic.pause(5000)
+    pins.digitalWritePin(DigitalPin.P0, 0)
+    while (true) {
+    	
     }
 })
-function Launch () {
-	if (ArmStatus) {
-        radio.sendNumber(42)
-        pins.digitalWritePin(DigitalPin.P13, 0)   
-    }
-}
 ```
 
-## Del 1.6:
+## Del 3.1: @unplugged
 
-### Rearmere kofferten før ny oppskytning
+### Oppgave 3: Skriv til OLED-skjerm
 
-Kofferten får ikke skyte opp en ny rakett før den er rearmert. (Armeringsbryteren må skrus AV.)
-
-Så for å "låse" kofferten etter at Launch-kommandoen er sendt, bruk en ``||loops: gjenta hvis sann ||``, og sett rearm-LED ``||pins: skriv digital til P8 ||`` til å blinke så lenge ``||pins: les digital P1 = 0 ||``.
-
-Bruk en ``||basic: pause ||`` på 500 ms mellom hver gang ``||pins: P8 ||`` er 1 og 0.
+Vi skal bruke en en Kitronik OLED-skjerm som skal kobles til mellom CanSat og micro:bit. ``||128x64 Display: gjenta hvis sann ||``
 
 ```blocks
 function Launch () {
