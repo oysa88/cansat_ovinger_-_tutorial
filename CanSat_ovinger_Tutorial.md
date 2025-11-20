@@ -36,9 +36,9 @@ NB: Koble pluss på LED til ingangen P0 og minus til jord (GND).
 
 ### Oppgave 1: Få LED-lyset til å skru seg AV og PÅ én gang hvert sekund.
 
-Inni ``||basic: Gjenta for alltid||``:
+Inni ``||basic: gjenta for alltid||``:
 
-Vi skal  bruke blokken ``||pins: skriv digital til||`` for å skru på LED-lyset vi har koblet til CanSat. Sett verdien til 1 for å skru lyset PÅ og 0 for å skru det AV.
+Finn blokken ``||pins: skriv digital til||`` som vi skal bruke for å skru AV og PÅ LED-lyset vi har koblet til CanSat. Sett verdien til 1 for å skru lyset PÅ og 0 for å skru det AV.
 
 Bruk en ``||basic: pause||`` for å si hvor lenge lyset skal være PÅ og AV.
 
@@ -50,17 +50,20 @@ Bruk en ``||basic: pause||`` for å si hvor lenge lyset skal være PÅ og AV.
 ```blocks
 basic.forever(function () {
     pins.digitalWritePin(DigitalPin.P0, 1)
-    basic.pause(500)
+    basic.pause(5000)
     pins.digitalWritePin(DigitalPin.P0, 0)
-    basic.pause(500)
-})
+}
 ```
 
 ## Del 2.1:
 
 ### Oppgave 2: Telle fra 10 til 0
 
-For å kunne telle nedover, trenger vi en variabel som kan huske tallet vår. Lag en ny variabel: ``||variables: teller ||``.
+**Når man skal lage store koder, er det vanlig å bruke ``||functions: funksjoner||``. Inni funksjonen bygger vi koden for det vi vil den skal utføre, og så kaller vi den opp når vi trenger den.**
+
+Start med å lage ``||functions: Funksjonen||`` nedtelling:
+
+For å kunne telle nedover, trenger vi en variabel som kan huske tallet vår. Lag en ny variabel: ``||variables: teller ||``, og sett den inn i ``||functions: nedtelling||``.
 
 Siden vi skal telle ned fra 10 til 0, bruker vi en ``||loops: FOR-løkke ||`` som lar og gjenta løkken akkurat så mange ganger vi ønsker. 
 
@@ -68,26 +71,28 @@ Sett ``||loops: gjenta for indeks ||`` til å kjøres **fra 0 til 10**.
 
 Inni ``||loops: FOR-løkke ||`` skal vi bruke en ``||basic: vis tall ||`` til å vise ``||variables: teller ||``. Og for hver gang den har vist tallet, ``||variables: endre teller med -1 ||``.
 
+Husk å kalle opp ``||functions: nedtelling||`` fra ``||basic: ved start||``.
+
 ```blocks
-let teller = 0
-basic.forever(function () {
+function nedtelling () {
     teller = 10
     for (let indeks = 0; indeks <= 10; indeks++) {
         basic.showNumber(teller)
         teller += -1
     }
-})
+}
+let teller = 0
+nedtelling()
 ```
 
 ## Del 2.2:
 
 ### Oppgave 2: Få LED-lys til å lyse i 5 sek.
 
-Bruk de samme blokkene fra oppgave 1 for å skru på LED i 5 sekunder. Endre ``||basic: pause ||`` til 5000 ms.
+Bruk de samme blokkene fra oppgave 1 for å skru på LED i 5 sekunder. Endre ``||basic: pause ||`` LED PÅ og AV til 5000 ms.
 
 ```blocks
-let teller = 0
-basic.forever(function () {
+function nedtelling () {
     teller = 10
     for (let indeks = 0; indeks <= 10; indeks++) {
         basic.showNumber(teller)
@@ -96,20 +101,21 @@ basic.forever(function () {
     pins.digitalWritePin(DigitalPin.P0, 1)
     basic.pause(5000)
     pins.digitalWritePin(DigitalPin.P0, 0)
-})
+}
+let teller = 0
+nedtelling()
 ```
 
 ## Del 2.3:
 
-### Stopp nedtellingen
+### Bestemme når nedtelling av starte
 
-Vi kan ikke stoppe blokken ``||basic: gjenta for alltid ||``. Men det vi kan, er å bruke en ``||loops: gjenta hvis sann ||`` der betingelsen alltid er oppfylt. Da vil koden forbli i løkken og gjenta den for alltid.
+``||functions: Funksjonen nedtelling||`` lar kjører når vi starter micro:biten. Hvis vi vil at den skal kjøres på nytt, kan vi f.eks. kalle den opp når vi ``||input: trykker på knapp A||``.
 
-La ``||loops: gjenta hvis sann ||`` stå tom, for det er ingenting den skal utføre.
+
 
 ```blocks
-let teller = 0
-basic.forever(function () {
+function nedtelling () {
     teller = 10
     for (let indeks = 0; indeks <= 10; indeks++) {
         basic.showNumber(teller)
@@ -118,43 +124,33 @@ basic.forever(function () {
     pins.digitalWritePin(DigitalPin.P0, 1)
     basic.pause(5000)
     pins.digitalWritePin(DigitalPin.P0, 0)
-    while (true) {
-    	
-    }
+}
+input.onButtonPressed(Button.A, function () {
+    nedtelling()
 })
+let teller = 0
+nedtelling()
 ```
 
-## Del 3.1: @unplugged
+## Del 3: @unplugged
 
 ### Oppgave 3: Skriv til OLED-skjerm
 
-Vi skal bruke en en Kitronik OLED-skjerm som skal kobles til mellom CanSat og micro:bit. ``||128x64 Display: gjenta hvis sann ||``
+Nå skal vi se på hvordan vi kan bruke en Kitronik OLED-skjerm for å bedre vise dataene våre. 
+
+Skjermen skal kobles til mellom CanSat og micro:bit.
+
+![Kitronik OLED-skjerm](https://www.lekolar.no/globalassets/inriver/resources/133848_118895.jpg)
+
+
+## Del 3.1:
+
+### Oppgave 3: Sette opp OLED-skjerm
 
 ```blocks
-function Launch () {
-	if (ArmStatus) {
-        radio.sendNumber(42)
-        pins.digitalWritePin(DigitalPin.P13, 0)
-        while (pins.digitalReadPin(DigitalPin.P1) == 0) {
-            pins.digitalWritePin(DigitalPin.P8, 1)
-            basic.pause(500)
-            pins.digitalWritePin(DigitalPin.P8, 0)
-            basic.pause(500)
-        }
-    }
-}
+kitronik_VIEW128x64.controlDisplayOnOff(kitronik_VIEW128x64.onOff(true))
+kitronik_VIEW128x64.setFontSize(kitronik_VIEW128x64.FontSelection.Big)
 ```
-
-## Del 1.7:
-
-### Bytte Tutorial
-
-Gratulerer! Vi er nå ferdige med å lage MÅ-koden på ControllerPAD!
-
-Bytt veiledning, og start å lage koden til LaunchPAD-kofferten!
-
-![Launch-PAD.jpg](https://i.postimg.cc/Sxhw0Mck/Launch-PAD.jpg)
-
 
 
 ## Del 1.2: 
